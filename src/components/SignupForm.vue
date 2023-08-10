@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {ref, reactive} from 'vue'
+import { faker } from '@faker-js/faker'
+
 
     // initialize the reactive variables
     const userEmail = ref('')
@@ -7,6 +9,7 @@ import {ref, reactive} from 'vue'
     const userConfirmPassword = ref('')
     const userName = ref('')
     const isEdit = ref(false)
+    const searchUser = ref('')
 
     // Database
     const state = ref([
@@ -23,6 +26,28 @@ import {ref, reactive} from 'vue'
         })
         state.value.push(Database)
     }
+    // clears the userlist (except for hardcoded accounts) by reloading the page
+    function clearHandler(){
+        location.reload()
+    }
+    // fill the form elemet with random generated values
+    function fillFormHandler(){
+        userEmail.value = faker.internet.email()
+        userPassword.value = faker.internet.password()
+        userConfirmPassword.value= faker.internet.password()
+        userName.value= faker.person.fullName()
+    }
+    // clears the input fields in the form
+    function newFormHandler(){
+        userEmail.value = ''
+        userPassword.value = ''
+        userConfirmPassword.value = ''
+        userName.value = ''
+    }
+    // search the user from the database (state)
+    function searchHandler(searchUser: string){  
+        return state.value.filter((user) => user.email.includes(searchUser))
+    }
 
 
 
@@ -31,10 +56,10 @@ import {ref, reactive} from 'vue'
 <template>
     <h1>Sign up</h1>
     <div class="navBar">
-        <button>clear</button>
-        <button>Fillform</button>
-        <button>Newform</button>
-        <input type="search" placeholder="search here">
+        <button @click="clearHandler">Clear</button>
+        <button @click='fillFormHandler'>Fillform</button>
+        <button @click="newFormHandler">Newform</button>
+        <input v-model="searchUser" type="search" placeholder="search here">
     </div>
     <form @submit.prevent="submitHandler">
         <input v-model="userEmail" type="email" placeholder="email">
@@ -43,6 +68,10 @@ import {ref, reactive} from 'vue'
         <input v-model="userName" type="text" placeholder="name">
         <button >{{isEdit? 'update' : 'sign up' }}</button>
     </form>
+    <p>Search Lists:
+        <p v-if = "searchUser === '' "></p>
+        <p v-else v-for ="user in searchHandler(searchUser)">{{ user.email }}</p>
+    </p>
     <p>Users' lists:
         <p v-for="(user, index) in state">
             <p>{{`${index+1}. ${user.email}`}}</p>
