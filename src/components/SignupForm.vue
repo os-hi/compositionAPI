@@ -1,84 +1,72 @@
 <script setup lang="ts">
-import {ref, reactive} from 'vue'
-import { faker } from '@faker-js/faker'
+import { useUserStore } from '../store'
+import {User} from '../Database'
+import {ref } from 'vue'
+import {faker} from '@faker-js/faker'
 
+    // reassign the useUserStore function from pinia
+    const userStore = useUserStore()
 
-    // initialize the reactive variables
+    // initialize ref variables
     const userEmail = ref('')
     const userPassword = ref('')
     const userConfirmPassword = ref('')
     const userName = ref('')
-    const isEdit = ref(false)
     const searchUser = ref('')
+    const isForm = ref<HTMLFormElement>()
 
-    // Database
-    const state = ref([
-        {email: 'batucanjake18@gmail.com', password: 'oshipogi', name: 'jake'},
-        {email: 'denver@gmail.com', password: 'oshipogi', name: 'denver'},
-    ])
-
-    // handle the submit form
-    function submitHandler(){
-        const Database = reactive({
+    //functions below
+    function handleSubmit(){
+        const formData: User = {
             email: userEmail.value,
             password: userPassword.value,
-            name: userName.value
-        })
-        state.value.push(Database)
+            name: userName.value,
+        }
+        userStore.users.push(formData)
     }
-    // clears the userlist (except for hardcoded accounts) by reloading the page
-    function clearHandler(){
+    function handleClear(){
         location.reload()
     }
-    // fill the form elemet with random generated values
-    function fillFormHandler(){
+    function handleFillForm(){
         userEmail.value = faker.internet.email()
-        userPassword.value = faker.internet.password()
-        userConfirmPassword.value= faker.internet.password()
-        userName.value= faker.person.fullName()
+        userPassword.value= faker.internet.password()
+        userConfirmPassword.value = faker.internet.password()
+        userName.value = faker.person.firstName();
     }
-    // clears the input fields in the form
-    function newFormHandler(){
-        userEmail.value = ''
-        userPassword.value = ''
-        userConfirmPassword.value = ''
-        userName.value = ''
+    function handleNewForm(){
+        isForm.value?.reset()
     }
-    // search the user from the database (state)
-    function searchHandler(searchUser: string){  
-        return state.value.filter((user) => user.email.includes(searchUser))
-    }
-
-
-
 </script>
 
 <template>
     <h1>Sign up</h1>
     <div class="navBar">
-        <button @click="clearHandler">Clear</button>
-        <button @click='fillFormHandler'>Fillform</button>
-        <button @click="newFormHandler">Newform</button>
-        <input v-model="searchUser" type="search" placeholder="search here">
+        <button @click="handleClear">Clear</button>
+        <button @click="handleFillForm">FillForm</button>
+        <button @click="handleNewForm">NewForm</button>
+        <input type="search" v-model="searchUser" placeholder="search user">
     </div>
-    <form @submit.prevent="submitHandler">
-        <input v-model="userEmail" type="email" placeholder="email">
-        <input v-model="userPassword" type='password' placeholder="password">
-        <input v-model="userConfirmPassword" type="password" placeholder="confirm password">
-        <input v-model="userName" type="text" placeholder="name">
-        <button >{{isEdit? 'update' : 'sign up' }}</button>
+    <form @submit.prevent="handleSubmit()" ref="isForm">
+        <input type="email" v-model="userEmail" placeholder="email">
+        <input type="password" v-model="userPassword" placeholder="password">
+        <input type="password" v-model="userConfirmPassword" placeholder="confirm password">
+        <input type="text" v-model="userName" placeholder="name">
+        <button type="submit">sign up</button>
     </form>
-    <p>Search Lists:
-        <p v-if = "searchUser === '' "></p>
-        <p v-else v-for ="user in searchHandler(searchUser)">{{ user.email }}</p>
+    <p>Search Users:
+        <p v-for="user in userStore.handleSearchUser(searchUser)">
+            <div v-if="searchUser === ''"></div>
+            <div v-else>{{`${user.email} | ${ user.name}`}}</div>
+        </p>
     </p>
-    <p>Users' lists:
-        <p v-for="(user, index) in state">
-            <p>{{`${index+1}. ${user.email}`}}</p>
+    <p>Users' List:
+        <p v-for="(user, index) in userStore.users">
+            <div>{{ `${index+1}. ${user.email}| ${user.name}`}}
+            <button @click="userStore.handleDelete(index)">delete</button>
+            </div>
         </p>
     </p>
 </template>
-
 
 <style scoped>
 form{

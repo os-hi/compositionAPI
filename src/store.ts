@@ -1,9 +1,18 @@
 import { defineStore } from 'pinia'
-import { Database, User } from './Database'
+import { Database } from './Database'
+import type { User } from './Database'
 
-export const userStore = defineStore('userInDatabase', ()=>{
+export const useUserStore = defineStore('userInDatabase', ()=>{
+    
 
-    let users: User[] = Database
+    const users: User[] = Database
+
+    function handleSearchUser(searchedUser : string){
+        return users.filter((user) => user.email.includes(searchedUser))
+    }
+    function handleDelete(index: number){
+        users.splice (index, 1)
+    }
    
-
+    return {users, handleSearchUser, handleDelete}
 })
