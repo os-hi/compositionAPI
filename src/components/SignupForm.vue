@@ -1,4 +1,5 @@
 <script setup lang="ts">
+//import dependencies
 import { useUserStore } from '../store'
 import {User} from '../Database'
 import {ref } from 'vue'
