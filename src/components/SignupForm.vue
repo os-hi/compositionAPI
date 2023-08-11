@@ -28,10 +28,10 @@ import {faker} from '@faker-js/faker'
         location.reload()
     }
     function handleFillForm(){
-        userEmail.value = faker.internet.email()
-        userPassword.value= faker.internet.password()
-        userConfirmPassword.value = faker.internet.password()
-        userName.value = faker.person.firstName();
+        userEmail.value = faker.internet.email().toLowerCase()
+        userPassword.value= faker.internet.password().toLowerCase()
+        userConfirmPassword.value = faker.internet.password().toLowerCase()
+        userName.value = faker.person.firstName().toLowerCase()
     }
     function handleNewForm(){
         isForm.value?.reset()
