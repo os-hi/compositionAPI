@@ -32,16 +32,12 @@ import {faker} from '@faker-js/faker'
         const password = newForm.get("password") as string
         const confirmPassword = newForm.get("confirmPassword") as string
         const name = newForm.get("name") as string
-        const emailFromStore = userStore.users.map((user) => user.email)
+        const emailFromStore = userStore.users.map((user: { email: any; }) => user.email)
 
         if(emailFromStore.includes(email))
-        {
             isEmailExisting.value = true
-            
-        }
-        else if(password !== confirmPassword){
-                isPasswordMatch.value = true
-            }
+        else if(password !== confirmPassword)
+            isPasswordMatch.value = true
         else{
             isEmailExisting.value = false
             isPasswordMatch.value = false
@@ -50,7 +46,7 @@ import {faker} from '@faker-js/faker'
                 password,
                 name
             }
-            userStore.users = [...userStore.users, formData]
+            userStore.users.push(formData)
             // userStore.users.push(formData)
         }     
     }
@@ -71,7 +67,7 @@ import {faker} from '@faker-js/faker'
     function handleSetEdit(email: any, index: number){
         isEdit.value = true
         formIndex.value = index
-        const user = userStore.users.find((user) => user.email === email)
+        const user = userStore.users.find((user: { email: any; }) => user.email === email)
         if (user){
             userEmail.value = user.email
             userPassword.value = user.password
@@ -91,6 +87,12 @@ import {faker} from '@faker-js/faker'
             name
         }
         userStore.users.splice(formIndex.value, 1, formData)
+    }
+    function handleSearchUser(searchedUser : string){
+        return userStore.users.filter((user: { email: string | string[]; }) => user.email.includes(searchedUser))
+    }
+    function handleDelete(index: number){
+        userStore.users.splice (index, 1)
     }
 </script>
 
@@ -119,7 +121,7 @@ import {faker} from '@faker-js/faker'
         <button type="submit">sign up</button>
     </form>
     <p>Search Users:
-        <p v-for="user in userStore.handleSearchUser(searchUser)">
+        <p v-for="user in handleSearchUser(searchUser)">
             <div v-if="searchUser === ''"></div>
             <div v-else>{{`${user.email} | ${ user.name}`}}</div>
         </p>
@@ -127,7 +129,7 @@ import {faker} from '@faker-js/faker'
     <p>Users' List: 
         <p v-for="(user, index) in userStore.users">
             <div>{{ `${index+1}. ${user.email}| ${user.name}`}}
-                <button @click="userStore.handleDelete(index)">delete</button>
+                <button @click="handleDelete(index)">delete</button>
                 <button @click="handleSetEdit(user.email, index)">edit</button>
             </div>
             
