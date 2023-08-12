@@ -1,9 +1,11 @@
 <script setup lang="ts">
+
 //import dependencies
 import { useUserStore } from '../store'
 import {User} from '../Database'
-import {ref } from 'vue'
+import {ref} from 'vue'
 import {faker} from '@faker-js/faker'
+
 
     // reassign the useUserStore function from pinia
     const userStore = useUserStore()
@@ -14,16 +16,43 @@ import {faker} from '@faker-js/faker'
     const userConfirmPassword = ref('')
     const userName = ref('')
     const searchUser = ref('')
-    const isForm = ref<HTMLFormElement>()
+    let isEdit = ref<boolean>(false)
+    let isEmailExisting = ref(false)
+    let isPasswordMatch = ref(false)
+    const formIndex = ref(0)
+
+
+    const signUpForm = ref<HTMLFormElement>()
 
     //functions below
-    function handleSubmit(){
-        const formData: User = {
-            email: userEmail.value,
-            password: userPassword.value,
-            name: userName.value,
+    function handleSubmit(event: Event){
+        // proper way to handle form
+        const newForm = new FormData(event.target as HTMLFormElement)
+        const email = newForm.get("email") as string
+        const password = newForm.get("password") as string
+        const confirmPassword = newForm.get("confirmPassword") as string
+        const name = newForm.get("name") as string
+        const emailFromStore = userStore.users.map((user) => user.email)
+
+        if(emailFromStore.includes(email))
+        {
+            isEmailExisting.value = true
+            
         }
-        userStore.users.push(formData)
+        else if(password !== confirmPassword){
+                isPasswordMatch.value = true
+            }
+        else{
+            isEmailExisting.value = false
+            isPasswordMatch.value = false
+            const formData: User = {
+                email,
+                password,
+                name
+            }
+            userStore.users = [...userStore.users, formData]
+            // userStore.users.push(formData)
+        }     
     }
     function handleClear(){
         location.reload()
@@ -35,7 +64,31 @@ import {faker} from '@faker-js/faker'
         userName.value = faker.person.firstName().toLowerCase()
     }
     function handleNewForm(){
-        isForm.value?.reset()
+        signUpForm.value?.reset()
+    }
+    function handleSetEdit(email: any, index: number){
+        isEdit.value = true
+        formIndex.value = index
+        const user = userStore.users.find((user) => user.email === email)
+        if (user){
+            userEmail.value = user.email
+            userPassword.value = user.password
+            userConfirmPassword.value = user.password
+            userName.value = user.name
+        }   
+    }
+    function handleEdit (event: Event){
+        // proper way to handle form
+        const newForm = new FormData(event.target as HTMLFormElement)
+        const email = newForm.get("email") as string
+        const password = newForm.get("password") as string
+        const name = newForm.get("name") as string
+        const formData: User = {
+            email,
+            password,
+            name
+        }
+        userStore.users.splice(formIndex.value, 1, formData)
     }
 </script>
 
@@ -47,11 +100,20 @@ import {faker} from '@faker-js/faker'
         <button @click="handleNewForm">NewForm</button>
         <input type="search" v-model="searchUser" placeholder="search user">
     </div>
-    <form @submit.prevent="handleSubmit()" ref="isForm">
-        <input type="email" v-model="userEmail" placeholder="email">
-        <input type="password" v-model="userPassword" placeholder="password">
-        <input type="password" v-model="userConfirmPassword" placeholder="confirm password">
-        <input type="text" v-model="userName" placeholder="name">
+    <form v-if="isEdit" @submit.prevent="handleEdit" ref="signUpForm">
+        <input type="email" v-model="userEmail" name="email" placeholder="email" required>
+        <input type="password" v-model="userPassword" name="password" placeholder="password" required>
+        <input type="password" v-model="userConfirmPassword" name="confirmPassword" placeholder="confirm password" required>
+        <input type="text" v-model="userName" name="name" placeholder="name" required>
+        <button type="submit" >update</button>
+    </form>
+    <form v-else @submit.prevent="handleSubmit" ref="signUpForm">
+        <input type="email" v-model="userEmail" name="email" placeholder="email" required>
+        <label for="email">{{ isEmailExisting ? 'email is existing!' : ''}}</label>
+        <input type="password" v-model="userPassword" name="password" placeholder="password" required>
+        <input type="password" v-model="userConfirmPassword" name="confirmPassword" placeholder="confirm password"  required>
+        <label for="password">{{ isPasswordMatch ? 'password did not match!' : '' }}</label>
+        <input type="text" v-model="userName" name="name" placeholder="name" required>
         <button type="submit">sign up</button>
     </form>
     <p>Search Users:
@@ -60,11 +122,13 @@ import {faker} from '@faker-js/faker'
             <div v-else>{{`${user.email} | ${ user.name}`}}</div>
         </p>
     </p>
-    <p>Users' List:
+    <p>Users' List: 
         <p v-for="(user, index) in userStore.users">
             <div>{{ `${index+1}. ${user.email}| ${user.name}`}}
-            <button @click="userStore.handleDelete(index)">delete</button>
+                <button @click="userStore.handleDelete(index)">delete</button>
+                <button @click="handleSetEdit(user.email, index)">edit</button>
             </div>
+            
         </p>
     </p>
 </template>
@@ -93,5 +157,10 @@ button{
 }
 .navBar>input{
     width: 150px;
+}
+label{
+    width: 250px;
+    font-size: 12px;
+    color: red;
 }
 </style>
