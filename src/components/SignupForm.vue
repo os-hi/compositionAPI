@@ -39,7 +39,7 @@ import {faker} from '@faker-js/faker'
             isEmailExisting.value = true
             
         }
-        if(password !== confirmPassword){
+        else if(password !== confirmPassword){
                 isPasswordMatch.value = true
             }
         else{
@@ -58,6 +58,8 @@ import {faker} from '@faker-js/faker'
         location.reload()
     }
     function handleFillForm(){
+        isEmailExisting.value = false
+        isPasswordMatch.value = false
         userEmail.value = faker.internet.email().toLowerCase()
         userPassword.value= faker.internet.password().toLowerCase()
         userConfirmPassword.value = userPassword.value
