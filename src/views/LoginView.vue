@@ -1,3 +1,7 @@
+<script setup lang="ts">
+    import LoginForm from '../components/LoginForm.vue';
+</script>
+
 <template>
-    <h1>LOGIN</h1>
+    <LoginForm />
 </template>

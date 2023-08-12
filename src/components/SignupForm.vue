@@ -39,7 +39,7 @@ import {faker} from '@faker-js/faker'
             isEmailExisting.value = true
             
         }
-        else if(password !== confirmPassword){
+        if(password !== confirmPassword){
                 isPasswordMatch.value = true
             }
         else{
@@ -60,7 +60,7 @@ import {faker} from '@faker-js/faker'
     function handleFillForm(){
         userEmail.value = faker.internet.email().toLowerCase()
         userPassword.value= faker.internet.password().toLowerCase()
-        userConfirmPassword.value = faker.internet.password().toLowerCase()
+        userConfirmPassword.value = userPassword.value
         userName.value = faker.person.firstName().toLowerCase()
     }
     function handleNewForm(){
