@@ -6,6 +6,9 @@ import {User} from '../Database'
 import {ref} from 'vue'
 import {faker} from '@faker-js/faker'
 
+    // TODO:
+        // role, firstname lastname, id and address (optional)
+        
 
     // reassign the useUserStore function from pinia
     const userStore = useUserStore()
@@ -22,7 +25,7 @@ import {faker} from '@faker-js/faker'
     const formIndex = ref(0)
 
 
-    const signUpForm = ref<HTMLFormElement>()
+    const signUpForm = ref()
 
     //functions below
     function handleSubmit(event: Event){
@@ -32,7 +35,7 @@ import {faker} from '@faker-js/faker'
         const password = newForm.get("password") as string
         const confirmPassword = newForm.get("confirmPassword") as string
         const name = newForm.get("name") as string
-        const emailFromStore = userStore.users.map((user: { email: any; }) => user.email)
+        const emailFromStore = userStore.users.map((user) => user.email)
 
         if(emailFromStore.includes(email))
             isEmailExisting.value = true
@@ -67,7 +70,7 @@ import {faker} from '@faker-js/faker'
     function handleSetEdit(email: any, index: number){
         isEdit.value = true
         formIndex.value = index
-        const user = userStore.users.find((user: { email: any; }) => user.email === email)
+        const user = userStore.users.find((user) => user.email === email)
         if (user){
             userEmail.value = user.email
             userPassword.value = user.password
@@ -88,8 +91,9 @@ import {faker} from '@faker-js/faker'
         }
         userStore.users.splice(formIndex.value, 1, formData)
     }
+
     function handleSearchUser(searchedUser : string){
-        return userStore.users.filter((user: { email: string | string[]; }) => user.email.includes(searchedUser))
+        return userStore.users.filter((user) => user.email.includes(searchedUser))
     }
     function handleDelete(index: number){
         userStore.users.splice (index, 1)
@@ -121,7 +125,7 @@ import {faker} from '@faker-js/faker'
         <button type="submit">sign up</button>
     </form>
     <p>Search Users:
-        <p v-for="user in handleSearchUser(searchUser)">
+        <p v-for="user in handleSearchUser(searchUser) ">
             <div v-if="searchUser === ''"></div>
             <div v-else>{{`${user.email} | ${ user.name}`}}</div>
         </p>

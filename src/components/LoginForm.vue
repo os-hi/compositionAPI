@@ -11,7 +11,7 @@ import {ref} from 'vue'
         const userEmail = newForm.get('email')
         const userPassword = newForm.get('password')
 
-        const userAccount = userStore.users.find((user: { email: FormDataEntryValue | null; }) => user.email === userEmail)
+        const userAccount = userStore.users.find((user) => user.email === userEmail)
         console.log(userAccount)
         if(userAccount){
                 if(userEmail !== userAccount.email || userPassword !== userAccount.password){
