@@ -34,29 +34,30 @@
         const userName = newForm.get("userName") as string
         const password = newForm.get("password") as string
 
-        if(newForm){
-            const newUser = {
-                id: state.id,
-                firstName,
-                lastName,
-                email,
-                userName,
-                password,
-                role: 'USER'
-            }
-           userStore.users = [...userStore.users, newUser]
-           const stringifyUsers = JSON.stringify(userStore.users)
-           localStorage.setItem('Users',stringifyUsers)
+        const newUser = {
+            id: state.id,
+            firstName,
+            lastName,
+            email,
+            userName,
+            password,
+            role: 'USER'
         }
+        userStore.users = [...userStore.users, newUser]
+        const stringifyUsers = JSON.stringify(userStore.users)
+        localStorage.setItem('Users',stringifyUsers)
+        
     }
     function generateUserName(){
         userName.value = userFirstName.value+userLastName.value+faker.number.int({max: 100, min:1})
     }
     function handleFormFill(){
+        const fullName = userFirstName.value+userLastName.value
+        
         userFirstName.value = faker.person.firstName()
         userLastName.value = faker.person.lastName()
         userEmail.value = faker.internet.email()
-        userName.value = userFirstName.value+userLastName.value+faker.number.int({max: 100, min:1})
+        userName.value = fullName+faker.number.int({max: 100, min:1})
         userPassword.value = faker.internet.password()
     }
 
