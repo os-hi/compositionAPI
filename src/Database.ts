@@ -1,8 +1,12 @@
-export const Database : User[] =[
+export const Database: User[] =[
     {
+        id: 1,
+        firstName: 'Jake',
+        lastName: 'Batucan',
         email: 'batucanjake18@gmail.com',
         password: 'jakepogi',
-        name: 'jake',
+        userName: 'oshi',
+        role: 'ADMIN'
     }
 
 ]
@@ -10,7 +14,11 @@ export const Database : User[] =[
 
 
 export type User = {
+    id: number,
+    firstName: string,
+    lastName: string
     email: string,
     password: string,
-    name: string
+    userName: string,
+    role: string
 }

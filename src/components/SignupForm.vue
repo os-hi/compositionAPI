@@ -1,174 +1,143 @@
 <script setup lang="ts">
+    // import necessary dependencies
+    import {ref, reactive} from 'vue'
+    import {useUserStore} from '../store'
+    import {faker} from "@faker-js/faker"
 
-//import dependencies
-import { useUserStore } from '../store'
-import {User} from '../Database'
-import {ref} from 'vue'
-import {faker} from '@faker-js/faker'
-
-    // TODO:
-        // role, firstname lastname, id and address (optional)
-        
-
-    // reassign the useUserStore function from pinia
+    // reassign the useUserStore function
     const userStore = useUserStore()
 
-    // initialize ref variables
+    // initialize ref string
+    const userFirstName = ref('')
+    const userLastName = ref('')
     const userEmail = ref('')
-    const userPassword = ref('')
-    const userConfirmPassword = ref('')
     const userName = ref('')
-    const searchUser = ref('')
-    let isEdit = ref<boolean>(false)
+    const userPassword = ref('')
+
+    // initialize ref boolean
     let isEmailExisting = ref(false)
-    let isPasswordMatch = ref(false)
-    const formIndex = ref(0)
+    let isChecked = ref(false)
+    let isFormEmpty = ref(false)
 
+    // initialize reactive variables
+    const state = reactive({
+        id : faker.number.int({min: 0, max: 99})
+    })
 
-    const signUpForm = ref()
-
-    //functions below
-    function handleSubmit(event: Event){
-        // proper way to handle form
-        const newForm = new FormData(event.target as HTMLFormElement)
+    // handle the submit form
+    function handleSubmit(_event: Event){
+        
+        const newForm = new FormData(_event.target as HTMLFormElement)
+        const firstName = newForm.get("firstName") as string
+        const lastName = newForm.get("lastName") as string
         const email = newForm.get("email") as string
+        const userName = newForm.get("userName") as string
         const password = newForm.get("password") as string
-        const confirmPassword = newForm.get("confirmPassword") as string
-        const name = newForm.get("name") as string
-        const emailFromStore = userStore.users.map((user) => user.email)
 
-        if(emailFromStore.includes(email))
-            isEmailExisting.value = true
-        else if(password !== confirmPassword)
-            isPasswordMatch.value = true
-        else{
-            isEmailExisting.value = false
-            isPasswordMatch.value = false
-            const formData: User = {
+        if(newForm){
+            const newUser = {
+                id: state.id,
+                firstName,
+                lastName,
                 email,
+                userName,
                 password,
-                name
+                role: 'USER'
             }
-            userStore.users.push(formData)
-            // userStore.users.push(formData)
-        }     
-    }
-    function handleClear(){
-        location.reload()
-    }
-    function handleFillForm(){
-        isEmailExisting.value = false
-        isPasswordMatch.value = false
-        userEmail.value = faker.internet.email().toLowerCase()
-        userPassword.value= faker.internet.password().toLowerCase()
-        userConfirmPassword.value = userPassword.value
-        userName.value = faker.person.firstName().toLowerCase()
-    }
-    function handleNewForm(){
-        signUpForm.value?.reset()
-    }
-    function handleSetEdit(email: any, index: number){
-        isEdit.value = true
-        formIndex.value = index
-        const user = userStore.users.find((user) => user.email === email)
-        if (user){
-            userEmail.value = user.email
-            userPassword.value = user.password
-            userConfirmPassword.value = user.password
-            userName.value = user.name
-        }   
-    }
-    function handleEdit (event: Event){
-        // proper way to handle form
-        const newForm = new FormData(event.target as HTMLFormElement)
-        const email = newForm.get("email") as string
-        const password = newForm.get("password") as string
-        const name = newForm.get("name") as string
-        const formData: User = {
-            email,
-            password,
-            name
+           userStore.users = [...userStore.users, newUser]
+           const stringifyUsers = JSON.stringify(userStore.users)
+           localStorage.setItem('Users',stringifyUsers)
         }
-        userStore.users.splice(formIndex.value, 1, formData)
+    }
+    function generateUserName(){
+        userName.value = userFirstName.value+userLastName.value+faker.number.int({max: 100, min:1})
+    }
+    function handleFormFill(){
+        userFirstName.value = faker.person.firstName()
+        userLastName.value = faker.person.lastName()
+        userEmail.value = faker.internet.email()
+        userName.value = userFirstName.value+userLastName.value+faker.number.int({max: 100, min:1})
+        userPassword.value = faker.internet.password()
     }
 
-    function handleSearchUser(searchedUser : string){
-        return userStore.users.filter((user) => user.email.includes(searchedUser))
-    }
-    function handleDelete(index: number){
-        userStore.users.splice (index, 1)
-    }
+
 </script>
-
 <template>
-    <h1>Sign up</h1>
-    <div class="navBar">
-        <button @click="handleClear">Clear</button>
-        <button @click="handleFillForm">FillForm</button>
-        <button @click="handleNewForm">NewForm</button>
-        <input type="search" v-model="searchUser" placeholder="search user">
-    </div>
-    <form v-if="isEdit" @submit.prevent="handleEdit" ref="signUpForm">
-        <input type="email" v-model="userEmail" name="email" placeholder="email" required>
-        <input type="password" v-model="userPassword" name="password" placeholder="password" required>
-        <input type="password" v-model="userConfirmPassword" name="confirmPassword" placeholder="confirm password" required>
-        <input type="text" v-model="userName" name="name" placeholder="name" required>
-        <button type="submit" >update</button>
-    </form>
-    <form v-else @submit.prevent="handleSubmit" ref="signUpForm">
-        <input type="email" v-model="userEmail" name="email" placeholder="email" required>
-        <label for="email">{{ isEmailExisting ? 'email is existing!' : ''}}</label>
-        <input type="password" v-model="userPassword" name="password" placeholder="password" required>
-        <input type="password" v-model="userConfirmPassword" name="confirmPassword" placeholder="confirm password"  required>
-        <label for="password">{{ isPasswordMatch ? 'password did not match!' : '' }}</label>
-        <input type="text" v-model="userName" name="name" placeholder="name" required>
-        <button type="submit">sign up</button>
-    </form>
-    <p>Search Users:
-        <p v-for="user in handleSearchUser(searchUser) ">
-            <div v-if="searchUser === ''"></div>
-            <div v-else>{{`${user.email} | ${ user.name}`}}</div>
-        </p>
-    </p>
-    <p>Users' List: 
-        <p v-for="(user, index) in userStore.users">
-            <div>{{ `${index+1}. ${user.email}| ${user.name}`}}
-                <button @click="handleDelete(index)">delete</button>
-                <button @click="handleSetEdit(user.email, index)">edit</button>
+    <div class="container">
+        <h1>Oshi</h1>
+        <form @submit.prevent="handleSubmit">
+            <div class="fullName">
+                <input type="text" placeholder="First name" name="firstName" v-model="userFirstName">
+                <input type="text" placeholder="Last Name" name="lastName" v-model="userLastName">
             </div>
-            
-        </p>
-    </p>
+            <input type="email" placeholder="Email" name="email" v-model="userEmail">
+            <input type="text" placeholder="Username" name="userName" v-model="userName">
+            <label for="username" @click="generateUserName">generate username</label>
+            <input :type="isChecked ? 'text' : 'password'" placeholder="Password" name="password" v-model="userPassword">
+            <label for="password">Show password<input type="checkbox" v-model="isChecked"></label>
+            <button type="submit" :disabled="isFormEmpty">Sign up</button>
+        </form>
+        <label for="email" v-if="isEmailExisting">Another account is using the same email</label>
+        <p>Have an account? <a href="/login"> Login</a></p>
+        <button @click="handleFormFill">FormFill</button>
+    </div>
 </template>
 
+
+
 <style scoped>
-form{
-    width: 250px;
+.container{
+    widows: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    gap: 5px;
-    margin-top: 10px;
+    justify-content: center;
+    box-sizing: border-box;
+    
 }
-input{
-    width: 250px;
+form{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.fullName{
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 2px;
+}
+.fullName>input{
+    width: 50%;
+    flex-wrap: nowrap;
+    padding: 8px;
+}
+form>input{
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
 }
 button{
-    width: 100px;
-}
-.navBar{
-    width: 400px;
-}
-.navBar>button{
-    width: 80px;
-}
-.navBar>input{
-    width: 150px;
+    margin-top: 20PX;
+    width: 100%;
+    padding: 5px;
+    border-radius: 10px;
 }
 label{
-    width: 250px;
+    margin: 0;
     font-size: 12px;
-    color: red;
+    height: 100%;
+    display: flex;
+    color: gray;
+}
+label>input{
+    margin-top: 0;
+    width: 12px;
+}
+a{
+    color: blue;
+}
+p{
+    font-size: 15px;
 }
 </style>

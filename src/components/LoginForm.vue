@@ -29,7 +29,7 @@ import {ref} from 'vue'
 </script>
 
 <template>
-    <h1>LOGIN</h1>
+    <h1>OSHI</h1>
     <form @submit.prevent="handleSubmit">
         <input type="email" name="email" placeholder="email" required>
         <input type="password" name="password" placeholder="password" required>
