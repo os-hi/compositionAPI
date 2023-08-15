@@ -11,7 +11,7 @@
 <style scoped>
 .loginContainer{
     width: 50vw;
-    height: 60vh;
+    height: 40vh;
     position: absolute;
     top: 50%;
     left: 50%;
