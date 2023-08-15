@@ -12,11 +12,11 @@
 
 <template>
      <header>
-        <div class="user"><h3>{{currentUser.userName }}</h3></div>
+        <div class="user"><h3>{{currentUser?.userName }}</h3></div>
         <p><a href="/login">Logout</a></p>
     </header>
     <main>
-        <h1>Welcome, {{ currentUser.userName }}</h1>
+        <h1>Welcome, {{ currentUser?.userName }}</h1>
     </main>
 </template>
 

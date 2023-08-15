@@ -12,8 +12,6 @@
     const userUsername = route.params.name
     const currentUser =  userStore.parsedUsers.find(user => user.userName === userUsername)
 
-    const userAccounts = userStore.parsedUsers.map(user => user)
-
     function handleUsers(){
         isUsersClicked.value = true
         isHomeClicked.value = false
@@ -24,14 +22,15 @@
     }
     function handleDelete(index: number){
         console.log("clicked here")
-        userAccounts.splice(index, 1)
+        const stringifyAccounts = JSON.stringify(userStore.parsedUsers.splice(index, 1))
+        localStorage.removeItem(stringifyAccounts)
     }
 
 </script>
 
 <template>
     <header>
-        <div class="user"><h3>{{currentUser.userName }}</h3></div>
+        <div class="user"><h3>{{currentUser?.userName }}</h3></div>
         <p><a href="/login">Logout</a></p>
     </header>
     <main>
@@ -44,12 +43,12 @@
     <section>
         <div v-if="isUsersClicked" class="home">
             <input type="search" placeholder="search here">
-            <p v-for="(user, index) in userAccounts">
-                <p v-if="user.role === 'USER'">{{`${index+1}. ${user.email}`}} <button @click="handleDelete(index)">delete</button></p>
+            <p v-for="(user, index) in userStore.parsedUsers">
+                <p v-if="user.role === 'USER'">{{`${index}. ${user.email}`}} <button @click="handleDelete(index)">delete</button></p>
             </p>
         </div>
         <div v-else>  
-            <h1>{{ `Welcome admin ${currentUser.userName}` }}</h1>
+            <h1>{{ `Welcome admin ${currentUser?.userName}` }}</h1>
         </div>
     </section>
     </main>
