@@ -3,9 +3,13 @@
     import {ref, reactive} from 'vue'
     import {useUserStore} from '../store'
     import {faker} from "@faker-js/faker"
+    import { useRouter } from 'vue-router';
 
     // reassign the useUserStore function
     const userStore = useUserStore()
+
+    // reassign the useRouter function 
+    const router = useRouter()
 
     // initialize ref string
     const userFirstName = ref('')
@@ -17,7 +21,10 @@
     // initialize ref boolean
     let isEmailExisting = ref(false)
     let isChecked = ref(false)
-    let isFormEmpty = ref(false)
+    let isLoggedIn = ref(false)
+
+    // initialize form reference
+    const dataForm = ref<HTMLFormElement | undefined>()
 
     // initialize reactive variables
     const state = reactive({
@@ -34,22 +41,34 @@
         const userName = newForm.get("userName") as string
         const password = newForm.get("password") as string
 
-        const newUser = {
-            id: state.id,
-            firstName,
-            lastName,
-            email,
-            userName,
-            password,
-            role: 'USER'
+        if(userStore.userEmails.includes(email)){
+            isEmailExisting.value = true
         }
-        userStore.users = [...userStore.users, newUser]
-        const stringifyUsers = JSON.stringify(userStore.users)
-        localStorage.setItem('Users',stringifyUsers)
+        else{
+            const newUser = {
+                id: state.id,
+                firstName,
+                lastName,
+                email,
+                userName,
+                password,
+                role: 'USER'
+            }
+            userStore.parsedUsers = [...userStore.parsedUsers, newUser]
+            clearForm()
+            const stringifyUsers = JSON.stringify(userStore.parsedUsers)
+            localStorage.setItem('Users',stringifyUsers)
+            isLoggedIn.value = true
+            router.push('/login')
+        }    
         
     }
     function generateUserName(){
         userName.value = userFirstName.value+userLastName.value+faker.number.int({max: 100, min:1})
+    }
+    function clearForm(){
+        if(dataForm.value)
+        dataForm.value.reset()
     }
     function handleFormFill(){
         const fullName = userFirstName.value+userLastName.value
@@ -66,7 +85,7 @@
 <template>
     <div class="container">
         <h1>Oshi</h1>
-        <form @submit.prevent="handleSubmit">
+        <form @submit.prevent="handleSubmit" ref="dataForm">
             <div class="fullName">
                 <input type="text" placeholder="First name" name="firstName" v-model="userFirstName">
                 <input type="text" placeholder="Last Name" name="lastName" v-model="userLastName">
@@ -76,10 +95,10 @@
             <label for="username" @click="generateUserName">generate username</label>
             <input :type="isChecked ? 'text' : 'password'" placeholder="Password" name="password" v-model="userPassword">
             <label for="password">Show password<input type="checkbox" v-model="isChecked"></label>
-            <button type="submit" :disabled="isFormEmpty">Sign up</button>
+            <button type="submit">Sign up</button>
         </form>
-        <label for="email" v-if="isEmailExisting">Another account is using the same email</label>
         <p>Have an account? <a href="/login"> Login</a></p>
+        <label class="emailExist" for="email" v-if="isEmailExisting">Email is already used</label>
         <button @click="handleFormFill">FormFill</button>
     </div>
 </template>
@@ -140,5 +159,8 @@ a{
 }
 p{
     font-size: 15px;
+}
+.emailExist{
+    color: red;
 }
 </style>
