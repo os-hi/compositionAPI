@@ -71,12 +71,11 @@
         dataForm.value.reset()
     }
     function handleFormFill(){
-        const fullName = userFirstName.value+userLastName.value
         
         userFirstName.value = faker.person.firstName()
         userLastName.value = faker.person.lastName()
         userEmail.value = faker.internet.email()
-        userName.value = fullName+faker.number.int({max: 100, min:1})
+        userName.value = userFirstName.value+userLastName.value+faker.number.int({max: 100, min:1})
         userPassword.value = faker.internet.password()
     }
 

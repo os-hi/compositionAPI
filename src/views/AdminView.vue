@@ -3,11 +3,18 @@ import AdminDashboard from '../components/AdminDashboard.vue'
 </script>
 
 <template>
-    <AdminDashboard />
+    <div class="adminContainer">
+        <AdminDashboard />
+    </div>
 </template>
 
 <style scoped>
-h1{
-    color: black;
+.adminContainer{
+    margin: 0;
+    width: 100%;
+    height: 100vh;
+    height: 40px;
+    border: 1px solid black;
+    box-sizing: border-box;
 }
 </style>
