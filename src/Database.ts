@@ -9,7 +9,7 @@ export const Database: User[] =[
         role: 'ADMIN'
     },
     {
-        id: 1,
+        id: 2,
         firstName: 'mac',
         lastName: 'idk',
         email: 'mac@gmail.com',
@@ -18,7 +18,7 @@ export const Database: User[] =[
         role: 'USER'
     },
     {
-        id: 1,
+        id: 3,
         firstName: 'denver',
         lastName: 'idk',
         email: 'denver@gmail.com',
@@ -27,7 +27,7 @@ export const Database: User[] =[
         role: 'USER'
     },
     {
-        id: 1,
+        id: 4,
         firstName: 'gen',
         lastName: 'idk',
         email: 'gen@gmail.com',
@@ -47,5 +47,5 @@ export type User = {
     email: string,
     password: string,
     userName: string,
-    role: string
+    role: 'ADMIN' | 'USER'
 }

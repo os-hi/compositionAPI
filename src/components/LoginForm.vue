@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import {useUserStore} from '../store'
+import {useUserStore,useToast} from '../store'
 import {ref} from 'vue'
 import { useRouter } from 'vue-router';
 
-    // reassign useUserStore function
+    // reassign store functions
     const userStore = useUserStore()
+    const {showToast} = useToast()
+    const toastNotif = useToast()
 
     // reassign useRouter function
     const router = useRouter()
 
     // initialize ref boolean
-    let isInValid = ref(false)
     let isChecked = ref(false)
 
 
@@ -24,15 +25,15 @@ import { useRouter } from 'vue-router';
         console.log(userAccount)
         if(userAccount){
                 if(userEmail === userAccount.email && userPassword === userAccount.password){
-                    alert('login successful')
-                    router.push({ name:`${userAccount.role.toLowerCase()}`, params:{name: userAccount.userName}})
+                    showToast('Login successful!', 'success');
+                    router.push({ name:'dashboard', params:{name: userAccount.userName}})
                 }
                 else{
-                    isInValid.value = true
+                    showToast('Login failed. Please check your credentials.', 'error');
                 }
         }
         else{
-            isInValid.value = true
+            showToast('Login failed. Please check your credentials.', 'error');
         }
         
     }
@@ -48,8 +49,9 @@ import { useRouter } from 'vue-router';
             <button type="submit">login</button>
         </form>
         <p>Don't have account yet? <a href="/">Sign up</a></p>
-        <label class="error" for="password">{{ isInValid ? 'Invalid credentials' : '' }}</label>
     </div>
+    <div v-if="toastNotif.isToastVisible" :class="[toastNotif.toastType, 'toast']" >{{ toastNotif.toastMessage }}</div> 
+
 </template>
 
 <style scoped>
@@ -60,7 +62,6 @@ import { useRouter } from 'vue-router';
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
 }
 form{
     display: flex;
@@ -94,7 +95,25 @@ p{
 a{
     color: blue;
 }
-.error{
-    color: red;
-}
+.toast {
+    width: 50%;
+    position: fixed;
+    top: -50%;
+    left: 90%;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: black;
+    font-size: 10px;
+    opacity: 0.9;
+    transition: opacity 0.3s;
+    box-sizing: border-box;
+  }
+  
+.success {
+    background-color: #4caf50;
+  }
+  
+.error {
+    background-color: #f44336;
+  }
 </style>

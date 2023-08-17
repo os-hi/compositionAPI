@@ -1,12 +1,16 @@
 <script setup lang="ts">
+
     // import necessary dependencies
     import {ref, reactive} from 'vue'
-    import {useUserStore} from '../store'
+    import {useUserStore, useToast} from '../store'
     import {faker} from "@faker-js/faker"
     import { useRouter } from 'vue-router';
+    import {User} from '../Database'
 
-    // reassign the useUserStore function
+    // reassign the store functions
     const userStore = useUserStore()
+    const {showToast} = useToast()
+    const toastNotif = useToast()
 
     // reassign the useRouter function 
     const router = useRouter()
@@ -21,7 +25,7 @@
     // initialize ref boolean
     let isEmailExisting = ref(false)
     let isChecked = ref(false)
-    let isLoggedIn = ref(false)
+    
 
     // initialize form reference
     const dataForm = ref<HTMLFormElement | undefined>()
@@ -43,9 +47,11 @@
 
         if(userStore.userEmails.includes(email)){
             isEmailExisting.value = true
+            console.log("error")
+            showToast('Email is already existing', 'error');
         }
         else{
-            const newUser = {
+            const newUser: User = {
                 id: state.id,
                 firstName,
                 lastName,
@@ -54,11 +60,11 @@
                 password,
                 role: 'USER'
             }
-            userStore.parsedUsers = [...userStore.parsedUsers, newUser]
+            // userStore.parsedUsers = [...userStore.parsedUsers, newUser]
             clearForm()
-            const stringifyUsers = JSON.stringify(userStore.parsedUsers)
-            localStorage.setItem('Users',stringifyUsers)
-            isLoggedIn.value = true
+            // const stringifyUsers = JSON.stringify(userStore.parsedUsers)
+            localStorage.setItem('Users', JSON.stringify(userStore.parsedUsers = [...userStore.parsedUsers, newUser]))
+            showToast('Account successfully registered', 'success')
             router.push('/login')
         }    
         
@@ -71,7 +77,7 @@
         dataForm.value.reset()
     }
     function handleFormFill(){
-        
+        isEmailExisting.value = false
         userFirstName.value = faker.person.firstName()
         userLastName.value = faker.person.lastName()
         userEmail.value = faker.internet.email()
@@ -100,6 +106,8 @@
         <label class="emailExist" for="email" v-if="isEmailExisting">Email is already used</label>
         <button @click="handleFormFill">FormFill</button>
     </div>
+    <!-- <div class="toast">NOTIFICATIONS</div> -->
+    <div v-if="toastNotif.isToastVisible" :class="[toastNotif.toastType, 'toast']" >{{ toastNotif.toastMessage }}</div> 
 </template>
 
 
@@ -112,7 +120,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
     
 }
 form{
@@ -159,7 +166,28 @@ a{
 p{
     font-size: 15px;
 }
+.toast {
+    width: 50%;
+    position: fixed;
+    top: -50px;
+    left: 100%;
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: black;
+    font-size: 10px;
+    opacity: 0.9;
+    transition: opacity 0.3s;
+    box-sizing: border-box;
+  }
+  
+.success {
+    background-color: #4caf50;
+  }
+  
+.error {
+    background-color: #f44336;
+  }
 .emailExist{
-    color: red;
+    color: red
 }
 </style>
